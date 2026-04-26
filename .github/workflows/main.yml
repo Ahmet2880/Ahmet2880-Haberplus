@@ -1,0 +1,127 @@
+HABERGEZEGENİ.COM - TÜM SİSTEM DERİNLEMESİNE DOKÜMAN
+📌 YÖNETİCİ ÖZETİ
+Bu doküman, HaberGezegeni.com adlı, yapay zeka ve otonom botlarla çalışan, tam otomatik bir haber sitesinin baştan sona tüm mimarisini, stratejisini ve teknik altyapısını açıklar. Sistem, insan müdahalesini minimuma indirerek, 20 farklı bot aracılığıyla haberleri toplar, filtreler, üretir, optimize eder ve 15 farklı platforma dağıtır. 13 ana kategori ve 150'den fazla alt başlıkta, günde 25'e kadar özgün haber üretebilir. 11 farklı gelir modeliyle aylık 50.000 TL ile 220.000 TL arasında potansiyel gelir hedeflenir. GDPR, KVKK, CCPA ve Google Consent Mode v2 başta olmak üzere tüm yasal çerçevelere tam uyumludur. Mobil ve masaüstü için optimize edilmiş, SEO'nun tüm gereklerini yerine getiren, Core Web Vitals standartlarını karşılayan bir yapıdır.
+
+BÖLÜM 1: PROJENİN VAROLUŞ SEBEBİ VE VİZYONU
+1.1 Temel Felsefe
+Geleneksel haber siteleri üç büyük sorunla karşı karşıyadır. Birincisi, insan editörlere bağımlı oldukları için maliyetleri yüksektir. İkincisi, genellikle sadece Google AdSense gibi tek bir gelir modeline dayandıkları için risk altındadırlar. Üçüncüsü, SEO ve trafik için sürekli yeni içerik üretme baskısı altındadırlar. HaberGezegeni, bu üç sorunu kökünden çözmek için inşa edilmiştir. Site, insan müdahalesini yalnızca "Yayınla" butonuna basmakla sınırlayan 20 otonom botla çalışır. Reklam, abonelik, affiliate, sponsorlu içerik, dijital ürün satışı gibi 11 farklı gelir modelini aynı anda yürütür. Programatik SEO sayesinde, nöbetçi eczane, döviz kurları, borsa ve hava durumu gibi sürekli aranan konularda pasif trafik çeker.
+
+1.2 Beş Yıllık Vizyon
+Birinci yılın sonunda aylık 500 bin sayfa görüntülenme ve 50 bin TL gelir hedeflenir. İkinci yılda site sektörde referans kaynak haline gelmeli, aylık 2 milyon sayfa görüntülenme ve 150 bin TL gelir bandına oturmalıdır. Üçüncü yılda İngilizce ayna site açılmalı, mobil uygulama yayınlanmalı, aylık 5 milyon sayfa görüntülenme aşılmalıdır. Beşinci yılda ise 5 dilde yayın yapan, kendi reklam ağına sahip, sektörün en büyük üç medya grubundan biri olma hedefi bulunmaktadır.
+
+BÖLÜM 2: SİSTEM MİMARİSİ
+2.1 Teknoloji Yığını
+Sistem dört katmanlı bir mimari üzerine kuruludur. En üstte sunum katmanı bulunur; burada WordPress, Neve teması ve özel olarak geliştirilmiş child tema çalışır. Kullanıcıya sunulan her şey bu katmanda şekillenir. Bir altında iş katmanı yer alır; PHP ve MySQL veritabanı burada çalışır, tüm botlar WordPress REST API üzerinden bu katmanla iletişim kurar. Otomasyon katmanı, n8n üzerinde çalışan 20 botu barındırır. Google Gemini API, yapay zeka içerik üretimini sağlar. En altta ise veri katmanı bulunur; MySQL yapısal verileri, Redis önbelleği, JSON dosyaları ise botların veri havuzlarını oluşturur.
+
+Tüm bu yapı Docker konteynerleri içinde çalışır. WordPress, MySQL, n8n ve Redis ayrı konteynerlarda, docker-compose ile yönetilir. Bu sayede sistem herhangi bir sunucuya tek komutla taşınabilir.
+
+2.2 Bot Mimarisi Genel Akış
+Botlar dört fazda çalışır. Birinci fazda internetten 25'ten fazla RSS ve API kaynağından ham haberler toplanır ve JSON havuzuna kaydedilir. İkinci fazda bu ham veriler beş katmanlı bir filtreden geçer; trend analizi, gerçeklik kontrolü, etkileşim potansiyeli, kategori eşleştirme ve dil işleme yapılır. Üçüncü fazda filtrelenmiş haberler yapay zeka tarafından özgün makalelere dönüştürülür, görseller üretilir, SEO optimizasyonu yapılır ve WordPress'e taslak olarak kaydedilir. Dördüncü fazda ise yayınlanan haberler 15 farklı platforma otomatik dağıtılır.
+
+BÖLÜM 3: 20 BOTUN DETAYLI GÖREV TANIMLARI
+Her botun ne iş yaptığını, ne sıklıkla çalıştığını, nereden veri alıp nereye veri gönderdiğini adım adım açıklıyorum.
+
+Birinci bot çok kaynaklı toplayıcıdır. Her 15 dakikada bir çalışır. 25'ten fazla RSS beslemesinden ve API'den ham haberleri çeker. TechCrunch, The Verge, NASA, The Hacker News, Dev.to, Entrepreneur gibi kaynaklardan gelen tüm verileri JSON formatında ham veri havuzuna kaydeder. Bu bot, sistemin hammadde giriş noktasıdır.
+
+İkinci bot beş katmanlı filtreleme yapar. Her 30 dakikada bir çalışır. Ham haberleri alır, Google Trends API'den trend verilerini çeker, aynı haberin birden fazla kaynakta geçip geçmediğini kontrol eder. Teyit.org API'si üzerinden doğruluk kontrolü yapar. Başlık ve içerikteki anahtar kelimelere göre kategori eşleştirmesi yapar. İngilizce içerikleri Türkçeye çevrilmek üzere işaretler. Her habere 0-100 arası bir trend puanı verir. 60 puanın altındakiler elenir. Kalanlar filtrelenmiş veri havuzuna kaydedilir.
+
+Üçüncü bot yapay zeka içerik üreticisidir. Her 30 dakikada bir çalışır. Filtrelenmiş haberleri alır, Google Gemini API kullanarak her haber için üç alternatif başlık üretir, tıklanma potansiyeline göre en iyisini seçer. Ham haberi özgünleştirir, en az yüzde 70 benzersizlik oranı hedefler. Türkçeye uyarlar, yerel örnekler ekler. Beş N bir K formatına dönüştürür. 500-800 kelime arası içerik üretir. Meta açıklama oluşturur, alt başlıklar ekler, ilgili etiketleri atar. Yazı sonuna "Siz ne düşünüyorsunuz?" sorusu ekler. Tüm bunları WordPress'e taslak olarak kaydeder.
+
+Dördüncü bot görsel ve medya üreticisidir. Her saat başı çalışır. Taslak yazıları tarar, her biri için öne çıkan görsel, içerik görseli ve sosyal medya karesi olmak üzere üç farklı boyutta görsel üretir. Alt metin ve SEO etiketlerini otomatik ekler. Canlıya geçince Flux 2 veya Google Imagen API ile gerçek görseller üretecektir.
+
+Beşinci bot SEO ve schema optimizasyonu yapar. Her iki saatte bir çalışır. Son yayınlanan yazıları tarar, her biri için NewsArticle schema işaretlemesi, breadcrumb schema, varsa FAQ schema, Open Graph ve Twitter Card meta etiketlerini kontrol eder ve eksikleri tamamlar. XML site haritasına anında ekler. Google Indexing API ile indeksleme talebi gönderir.
+
+Altıncı bot yayın yöneticisidir. Webhook ile tetiklenir, yani bir olay olduğunda anında çalışır. Taslak halindeki yazıları kalite kontrolünden geçirir. Yapay zeka puanı 70'in üzerinde ve kelime sayısı 300'ün üzerinde olanları otomatik yayınlar. Ancak sistem, sizin manuel onayınız için de yapılandırılabilir.
+
+Yedinci bot çoklu platform dağıtıcıdır. Siz bir haberi yayınladığınız anda webhook ile tetiklenir. WordPress ana siteye ek olarak Google News, Google Discover, Bing News, Yandex News, X (Twitter), LinkedIn, Facebook, Instagram, Telegram, WhatsApp, Flipboard, Apple News, e-posta bülteni ve Medium olmak üzere 15 farklı platforma formatlanmış içerik gönderir.
+
+Sekizinci bot spam engelleme yapar. Her saat başı çalışır. Onay bekleyen yorumları tarar, belirli spam anahtar kelimelerini içerenleri otomatik siler.
+
+Dokuzuncu bot iç bağlantı oluşturur. Her altı saatte bir çalışır. Son 20 yazıyı tarar, yazılar arasında anahtar kelime eşleşmesi varsa otomatik iç bağlantı önerileri üretir.
+
+Onuncu bot kırık link tarayıcıdır. Haftalık çalışır. Tüm yayınlanmış yazılardaki harici linkleri tarar, kırık olabilecekleri işaretler.
+
+On birinci bot sosyal medya takvimi oluşturur. Her dört saatte bir çalışır. Son beş yazıyı alır, X, LinkedIn, Facebook, Instagram, Telegram, WhatsApp için platforma özel formatlanmış paylaşım metinleri hazırlar.
+
+On ikinci bot site sağlığı izleme yapar. Her 30 dakikada bir çalışır. WordPress API'sini ve site ana sayfasını kontrol eder, yanıt sürelerini ölçer, uptime yüzdesini hesaplar. Sorun varsa log'a kaydeder.
+
+On üçüncü bot haftalık bülten hazırlar. Her pazartesi sabah çalışır. Son bir haftanın en çok okunan on haberini alır, HTML e-posta formatında bir bülten oluşturur.
+
+On dördüncü bot akıllı reklam yerleşimi yapar. Her altı saatte bir çalışır. Son 50 yazının kelime ve paragraf sayısına göre optimum reklam yerleşim noktalarını belirler.
+
+On beşinci bot fiyat karşılaştırma ve fırsat avcısıdır. Her üç saatte bir çalışır. Önceden tanımlanmış ürün listesindeki fiyatları kontrol eder, fırsat yazıları oluşturur.
+
+On altıncı bot e-kitap üreticidir. Aylık çalışır. En popüler 30 yazıyı derleyerek aylık trend raporu formatında bir e-kitap taslağı oluşturur.
+
+On yedinci bot gelir takip panosu oluşturur. Her 12 saatte bir çalışır. Tüm gelir kaynaklarının durumunu, tahmini aylık gelirleri ve öncelikli aksiyonları içeren bir rapor üretir.
+
+On sekizinci bot politika uyum denetleyicisidir. Her altı saatte bir çalışır. Son 20 yazıyı tarar, Google Publisher Policies'e aykırı içerik, nefret söylemi, yasa dışı bahis gibi ifadeleri arar. Ayrıca finans ve sağlık içeriklerinde sorumluluk reddi olup olmadığını kontrol eder.
+
+On dokuzuncu bot reklam yoğunluğu optimize edicidir. Her üç saatte bir çalışır. Son 30 yazıdaki reklam sayısını, kelime sayısına oranlar. Google'ın maksimum yüzde 30 reklam yoğunluğu politikasına uygunluğu denetler.
+
+Yirminci bot yayın stratejisi oluşturur. Her saat başı çalışır. Günün saatine ve haftanın gününe göre optimal yayın frekansını, hangi kategorilerin öne çıkarılması gerektiğini belirler. Hafta içi günde 25, hafta sonu günde 15 haber hedefini yönetir.
+
+BÖLÜM 4: İÇERİK STRATEJİSİ VE KATEGORİ YAPISI
+4.1 13 Ana Kategorinin Stratejik Konumlandırması
+Sitenin birincil kümesinde yer alan Teknoloji ve Gelecek, Finans ve Ekonomi, Dijital Gelir Modelleri kategorileri toplam içeriğin yaklaşık yarısını oluşturur. Bunlar en yüksek TBM'ye sahip, reklam geliri en yüksek kategorilerdir. İkincil kümede Modern Wellness, Eğitim ve Kariyer, Oyun ve Dijital Eğlence, Siber Güvenlik, Yazılım ve Kodlama, Otomobil ve Mobilite yer alır. Toplam içeriğin yaklaşık yüzde 30'unu oluştururlar. Üçüncül kümede ise Yeni Nesil Gündem, Hukuk ve Mevzuat, Seyahat Teknolojileri, Bilim ve Uzay bulunur; içeriğin yaklaşık yüzde 20'sini kapsarlar.
+
+Her ana kategorinin altında en az 10, toplamda 150'den fazla alt başlık bulunur. Örneğin Teknoloji ve Gelecek altında yapay zeka, ChatGPT, girişimcilik, mobil dünya, giyilebilir teknoloji, otomasyon, akıllı ev, teknoloji devleri, gelecek tahminleri ve AI etiği başlıkları vardır. Finans ve Ekonomi altında Borsa İstanbul, kripto para, kişisel finans, döviz kurları, temettü emekliliği, küresel piyasalar, merkez bankaları, vergi düzenlemeleri, yatırım fonları ve enflasyon bulunur.
+
+4.2 İçerik Kalite Standartları
+Sistem dört farklı içerik tipini yönetir. Kısa haberler en az 300 kelime olmalı, bir reklam içermeli, bir görsel ve iki iç bağlantı barındırmalıdır. Standart haberler 500 kelime, bir-iki reklam, iki görsel ve üç iç bağlantı içerir. Derinlemesine analizler 800 kelime, iki-üç reklam, üç görsel ve beş iç bağlantı gerektirir. Rehber niteliğindeki içerikler ise 1000 kelime, iki-üç reklam, dört veya daha fazla görsel ve beşten fazla iç bağlantıyla hazırlanır. 100 üzerinden 60 puanın altında kalite puanı alan hiçbir içerik yayınlanamaz.
+
+4.3 Günlük Yayın Stratejisi
+Saat bazlı optimal yayın planı şöyledir. Sabah 7 ila 10 arası finans ve teknoloji ağırlıklı, saatte üç haber yayınlanır. Öğle 11 ila 13 arası dijital gelir ve yazılım haberleri, saatte iki adet yayınlanır. Öğleden sonra 14 ila 17 arası rehber ve sağlık içerikleri, saatte iki adet yayınlanır. Akşam 18 ila 21 arası oyun, otomobil ve yaşam içerikleri, saatte iki adet yayınlanır. Gece 22 ila 6 arası düşük frekansta, saatte bir yayın yapılır.
+
+BÖLÜM 5: SEO VE TRAFİK STRATEJİSİ
+5.1 Trafik Kaynaklarının Dağılımı
+Organik arama trafiği toplam trafiğin yaklaşık yüzde 45'ini hedefler. Bunun için programatik SEO sayfaları kritik önem taşır. Nöbetçi eczane sayfaları 81 il ve her ilin ortalama 10 ilçesiyle 810 sayfalık bir havuz oluşturur. Döviz ve altın sayfaları, borsa sayfaları, hava durumu sayfaları benzer şekilde geniş bir anahtar kelime yelpazesini kapsar.
+
+Sosyal medya trafiği toplamın yaklaşık yüzde 20'sini hedefler. X platformu finans ve teknoloji haberleri için, LinkedIn iş dünyası ve kariyer içerikleri için, Telegram anlık bildirimler için, Facebook ise genel kitle için kullanılır.
+
+Google Discover trafiği toplamın yüzde 15'ini hedefler. Bunun için her haberde en az 1200x630 piksel boyutunda büyük görsel kullanılması, merak uyandıran ama tıklama tuzağı olmayan başlıklar atılması gerekir.
+
+Google News trafiği toplamın yüzde 10'unu hedefler. Günlük en az 2-3 haber yayını, eksiksiz künye ve editör bilgileri, tarih damgalı URL yapısı şarttır.
+
+Kalan yüzde 10'luk dilim ise e-posta bülteni, push bildirimleri ve yer imlerinden gelen direkt trafiktir.
+
+5.2 SEO Teknik Altyapısı
+Schema işaretlemeleri eksiksiz uygulanır. Her haber için NewsArticle schema, tüm sayfalar için breadcrumb schema, site navigasyonu için SiteNavigationElement schema, sesli arama uyumu için Speakable schema, inceleme yazıları için Review schema ve varsa soru-cevap içerikleri için FAQ schema otomatik eklenir.
+
+Bing ve Yandex için IndexNow protokolü aktiftir; her yeni içerik anında bu arama motorlarına bildirilir. Özel RSS beslemeleri tüm kategoriler için ayrı ayrı sunulur. HTML site haritası tüm içeriğin kolayca taranmasını sağlar.
+
+BÖLÜM 6: GELİR MODELLERİ
+6.1 11 Gelir Modelinin Detayları
+En temelde Google AdSense yer alır; aylık 5 bin ila 15 bin TL arası potansiyel getirir. Header bidding sistemi Prebid.js ile çalışır, Google AdX ve diğer reklam ağlarını aynı anda yönetir; aylık 3 bin ila 10 bin TL ek gelir sağlar. Amazon satış ortaklığı otomatik link dönüştürücü ile çalışır; ürün incelemelerinden aylık 2 bin ila 8 bin TL gelir hedeflenir. Hepsiburada, Trendyol gibi diğer affiliate ağları da benzer şekilde 1 ila 5 bin TL arası katkı sağlar.
+
+Premium üyelik sistemi, sınırsız haber okuma, özel analiz raporları, reklamsız deneyim gibi avantajlarla aylık 29.90 TL'den başlar. 100 üye hedefiyle aylık 5 bin ila 20 bin TL gelir potansiyeli vardır. Dijital ürün satışı, e-kitap ve sektör raporlarıyla aylık 2 bin ila 10 bin TL getirebilir. İş ilanı panosu, ilan başına ücretlendirme ile 3 bin ila 15 bin TL arası gelir sağlar.
+
+Sponsorlu içerikler, marka iş birlikleri ile aylık 10 bin ila 50 bin TL potansiyel taşır. Webinar ve etkinlik biletleri 5 bin ila 25 bin TL arası gelir getirebilir. Veri ve analiz raporu satışı kurumsal müşterilere yöneliktir, 10 bin ila 50 bin TL potansiyeli vardır. İçerik sendikasyonu, API ile diğer platformlara içerik dağıtımıyla 3 bin ila 12 bin TL ek gelir sağlar.
+
+Toplamda minimum 49 bin TL, maksimum 220 bin TL aylık potansiyel gelir söz konusudur. Altıncı ayda gerçekçi hedef 75 bin ila 100 bin TL arasıdır.
+
+6.2 Reklam Formatları Çeşitliliği
+Sistemde 12 farklı reklam formatı vardır. Billboard 970x250 piksellik en değerli reklam alanıdır. Skyscraper 160x600 yan sütunda yer alır. Leaderboard 728x90 içerik üstünde konumlanır. MPU 300x250 veya 300x600 boyutlarıyla içerik içinde, üçüncü paragraftan sonra görünür. Sticky footer mobil cihazlarda ekranın altına sabitlenir. Anchor top sayfa yukarı kaydırıldığında üstte belirir. Interstitial 45 saniye sonra tam sayfa geçiş reklamı gösterir. Outstream video, sayfanın yüzde 60'ı kaydırıldığında açılır. Native reklamlar içerik gibi görünür. In-feed reklamlar haber akışı içine yerleşir. Rewarded reklamlar premium içeriğe erişim için ödüllü sistem sunar. Video in-stream reklamlar ise video içinde gösterilir.
+
+Google politikası gereği reklam/içerik oranı hiçbir zaman yüzde 30'u geçmez. 500 kelimenin altındaki içeriklerde maksimum bir reklam, 500-800 kelime arasında iki reklam, 800 kelime üzerinde ise maksimum üç reklam gösterilir.
+
+BÖLÜM 7: KULLANICI DENEYİMİ VE ETKİLEŞİM
+Siteye gelen bir kullanıcı önce ilerleme çubuğunu görür; bu, okuma ilerlemesini yüzde olarak gösterir. Hemen altında tahmini okuma süresi, kelime sayısı ve görüntülenme sayısı yer alır. Kullanıcı yazı tipi boyutunu büyütüp küçültebilir, karanlık modu açabilir, sayfayı yazdırabilir. Sesli okuma özelliği ile haberi dinleyebilir; okuma hızını 0.75x ile 1.5x arasında ayarlayabilir. Yer imi butonu ile haberi sonra okumak üzere kaydedebilir.
+
+Haberin sonunda altı farklı emoji ile tepki verebilir. Yorum yapabilir. Önceki ve sonraki habere geçiş yapabilir. 45 saniye boyunca sayfada kalırsa otomatik olarak sonraki habere yönlendirilir. "Senin için önerilenler" bölümü, kullanıcının okuma geçmişine göre kişiselleştirilmiş öneriler sunar.
+
+BÖLÜM 8: YASAL UYUM VE GÜVENLİK
+Sistem dört katmanlı yasal uyum çerçevesine sahiptir. Uluslararası düzeyde GDPR, CCPA ve TCF 2.2'ye uyumludur. Türkiye mevzuatı kapsamında KVKK ve 5651 sayılı İnternet Kanunu'na uygundur. Google politikaları açısından Consent Mode v2 zorunluluğu karşılanmış, Google Publisher Policies ve AdSense Program Politikaları'na tam uyum sağlanmıştır. Site içinde çerez onay banner'ı, KVKK aydınlatma metni, gizlilik politikası, kullanım koşulları, çerez politikası, veri ihlali prosedürü, harici link uyarısı, sponsorlu içerik etiketi ve finans/sağlık içerikleri için otomatik yasal uyarı sistemi çalışmaktadır.
+
+Güvenlik katmanında Wordfence firewall, iki faktörlü kimlik doğrulama, XML-RPC kapatma, ülke bazlı engelleme, brute force koruması ve günlük otomatik tam yedekleme bulunur. Performans katmanında Redis önbellek, lazy load, DNS prefetch, script defer ve Core Web Vitals optimizasyonları yapılmıştır.
+
+BÖLÜM 9: CANLIYA GEÇİŞ AŞAMALARI
+Şu an tüm sistem localhost'ta çalışır durumdadır. Canlıya geçiş için ilk aşamada domain ve hosting satın alınması, SSL sertifikası kurulması ve Cloudflare DNS yapılandırması gerekir. İkinci aşamada Google Gemini API anahtarı, Google Search Console doğrulaması, Google Analytics 4 entegrasyonu, X API ve Mailchimp API bağlantıları yapılır. Üçüncü aşamada Google AdSense, Google News ve Google Ad Manager başvuruları yapılır. Dördüncü aşamada en az 30-40 haber elle yayınlanarak site boş görünümden kurtarılır, botlar kademeli olarak aktif edilir. Beşinci aşamada ise ilk ay 15-20 günlük haber hedefiyle başlanır, ikinci ayda AdSense onayıyla ilk gelirler elde edilir, üçüncü ayda 100 bin aylık sayfa görüntülenme hedeflenir.
+
+BÖLÜM 10: ASLA SİLİNMEMESİ GEREKEN KRİTİK BİLEŞENLER
+Veritabanı dosyaları, özellikle MySQL veri dizini ve wp-config.php dosyası asla silinmemelidir; bunların kaybı sitenin tamamen yok olması anlamına gelir. Docker-compose.yml dosyası tüm servislerin tanımını içerir, silinmesi durumunda hiçbir servis başlatılamaz. n8n veritabanı, 20 botun tüm workflow'larını barındırır. Özel geliştirilmiş eklentiler, döviz, borsa, eczane gibi tüm modülleri içerir. Yedekleme dosyaları, felaket anında tek kurtarma noktasıdır. Bu bileşenlerin tamamı günlük olarak yedeklenmekte ve son 7 günlük yedekler saklanmaktadır.
+
+BÖLÜM 11: BAŞARI TANIMI VE NİHAİ HEDEFLER
+Sistem beş seviyeli bir başarı ölçeğine göre değerlendirilir. Birinci seviye hayatta kalma evresidir; site yayındadır, botlar çalışır, günlük en az 10 tekil ziyaretçi gelir. İkinci seviye kendini idame ettirme evresidir; aylık gelir giderleri karşılar, AdSense onayı alınmıştır, Google News'te görünür. Üçüncü seviye büyüme evresidir; aylık 50 bin TL gelir aşılır, 100'den fazla premium üye vardır, ilk sponsorlu içerik anlaşması yapılır. Dördüncü seviye pazar liderliği evresidir; sektörde ilk 10 haber sitesi arasına girilir. Beşinci seviye ise nihai hedeftir; 5 dilde yayın, kendi teknolojisini SaaS olarak satma, aylık 10 milyondan fazla sayfa görüntülenme.
+
+HaberGezegeni.com, sadece bir haber sitesi değil, geleceğin medya imparatorluğunun temelidir. Sistem hazırdır. Başarı, sürekli iyileştirme ve adaptasyonla gelecektir.
